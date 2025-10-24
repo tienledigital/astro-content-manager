@@ -1,0 +1,31 @@
+{
+  "name": "astro-github-content-manager",
+  "version": "1.0.0",
+  "description": "An Astro integration to upload Markdown/MDX posts and images directly to your GitHub repository.",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "keywords": [
+    "astro-integration",
+    "astro-component",
+    "github"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@astrojs/react": "^3.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "simple-git": "^3.20.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "astro": "^4.0.0",
+    "typescript": "^5.3.0"
+  }
+}
