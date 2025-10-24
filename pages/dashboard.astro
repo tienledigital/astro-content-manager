@@ -1,1 +1,15 @@
-ûï¿ý8b±ø¥y§-°
+---
+// File: pages/dashboard.astro
+import App from '../components/App.tsx';
+---
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astro Content Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <App client:only="react" />
+</body>
+</html>
