@@ -1,14 +1,14 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
-// Import the content manager integration from its new location
-import contentManager from './src/lib/content-manager/integration'; // <-- Đường dẫn có thể thay đổi
+// Import the content manager integration (this project's own integration)
+import contentManager from './integration.ts'; // Correct path to the integration file
 
 // https://astro.build/config
 export default defineConfig({
   integrations: [
     react(),
-    // Add the content manager integration
-    // You can customize the route where the manager will be available
-    contentManager({ route: '/admin' }) // Ví dụ: truy cập qua a.com/admin
+    // Add this project's own content manager integration for development/testing
+    // The route can be customized here for local development
+    contentManager({ route: '/dashboard' }) // Default route for the integration's UI
   ]
 });
