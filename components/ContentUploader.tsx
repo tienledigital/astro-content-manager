@@ -3,17 +3,19 @@ import { GithubRepo } from '../types';
 import FileUploader from './FileUploader';
 import DirectoryPicker from './DirectoryPicker';
 import * as githubService from '../services/githubService';
+import { BackIcon } from './icons/BackIcon';
 import { DocumentIcon } from './icons/DocumentIcon';
 import { ImageIcon } from './icons/ImageIcon';
 
 interface ContentUploaderProps {
   token: string;
   repo: GithubRepo;
+  onBack: () => void;
 }
 
-const ContentUploader: React.FC<ContentUploaderProps> = ({ token, repo }) => {
-  const [postsPath, setPostsPath] = useState('src/content/blog');
-  const [imagesPath, setImagesPath] = useState('public/images');
+const ContentUploader: React.FC<ContentUploaderProps> = ({ token, repo, onBack }) => {
+  const [postsPath, setPostsPath] = useState('');
+  const [imagesPath, setImagesPath] = useState('');
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
 
   const [isPostsPickerOpen, setIsPostsPickerOpen] = useState(false);
@@ -65,6 +67,12 @@ const ContentUploader: React.FC<ContentUploaderProps> = ({ token, repo }) => {
         <div className="flex-grow">
           <h2 className="text-2xl font-bold text-gray-900">Managing: {repo.full_name}</h2>
           <p className="text-gray-600">Upload new posts and images to your project.</p>
+        </div>
+        <div className="flex items-center space-x-2 flex-shrink-0">
+          <button onClick={onBack} className="inline-flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded transition duration-200">
+            <BackIcon className="w-5 h-5 mr-2" />
+            Change Repo
+          </button>
         </div>
       </div>
 

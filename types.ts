@@ -12,8 +12,8 @@ export interface GithubRepo {
   private: boolean;
   html_url: string;
   description: string;
-  // fix: Add pushed_at property to match GitHub API response for sorting.
   pushed_at: string;
+  default_branch: string;
   owner: {
     login: string;
   };
@@ -34,6 +34,8 @@ export interface GithubContent {
   git_url: string;
   download_url: string | null;
   type: 'file' | 'dir';
+  content?: string; // Present when fetching a file
+  encoding?: 'base64'; // Present when fetching a file
   _links: {
     self: string;
     git: string;

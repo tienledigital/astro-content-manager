@@ -4,74 +4,101 @@ This document provides a detailed overview of the Astro Content Manager, includi
 
 ## 1. Introduction
 
-The Astro Content Manager is a client-side web application designed to simplify the process of adding new content (Markdown/MDX blog posts and images) to an Astro-based project hosted on GitHub. It provides a user-friendly interface that communicates directly with the GitHub API, eliminating the need for `git` commands or local development environments for simple content additions.
+The Astro Content Manager is a client-side web application designed to simplify the process of adding and managing content (Markdown/MDX posts and images) in an Astro-based project hosted on GitHub. It provides a feature-rich, user-friendly dashboard that communicates directly with the GitHub API, eliminating the need for `git` commands or local development environments for most content-related tasks.
 
-The entire application runs in the browser. User credentials (GitHub PAT) are stored securely in `sessionStorage` for the current browser session and are only sent directly to the GitHub API.
+The entire application runs in the browser. User credentials (GitHub PAT) are encrypted using the Web Crypto API before being stored in `sessionStorage` for the current browser session.
 
 ## 2. Core Functionality
 
 ### GitHub Authentication
-- The application uses a GitHub **Personal Access Token (PAT)** for authentication.
+- The application uses a GitHub **Personal Access Token (PAT)** and a repository URL for connection.
 - For maximum security, users must generate a **Fine-Grained Personal Access Token**. This allows access to be restricted to a single repository with specific permissions.
 - The required permissions are under "Repository permissions": **"Contents"** must be set to **"Read and write"**.
-- The token is saved in the browser's `sessionStorage` for the current session, providing better security. It is cleared when the browser tab is closed.
+- The token is **encrypted on the client-side** and stored in the browser's `sessionStorage`. It is cleared when the browser tab is closed.
 
-### Repository Selection
-- Once authenticated, the application fetches a list of all repositories the user has access to.
-- A search bar is provided to quickly filter and find the target Astro repository.
-- The selected repository is also saved in `sessionStorage` to streamline the user's workflow within the same session.
+### Smart Initial Setup
+- Upon first connection to a repository, the application automatically scans for directories that contain Markdown files (e.g., `src/content/blog`, `src/posts`).
+- It presents these as suggestions, allowing the user to quickly select their main content directory. A manual directory picker is also available.
+- This setting is saved locally for the specific repository, streamlining future sessions.
 
-### Content Uploading
-The main interface is split into two sections:
+### The Dashboard
+The main interface is a multi-tabbed dashboard providing a complete content management solution.
 
-#### **Post Uploader**
-- Designed for uploading Markdown (`.md`) and MDX (`.mdx`) files.
-- Users can select a destination directory within the repository using a visual **Directory Picker**. This prevents typos and ensures files land in the correct location (e.g., `src/content/blog/`).
-- The allowed file types are configured within the project to be **`.md` and `.mdx`**.
+#### **Manage Posts Tab**
+- Displays a paginated, searchable grid of all posts from the selected content directory.
+- Each post is represented as a card showing key frontmatter details (title, author, date, tags, etc.) and a cover image.
+- **Actions:**
+  - **Preview:** Opens a modal with a full preview of the rendered Markdown, a metadata view, and the raw code.
+  - **Update File:** Allows replacing the entire `.md`/`.mdx` file with a new version from your local machine.
+  - **Update Image:** A shortcut to upload a new cover image and automatically update the post's frontmatter.
+  - **Delete:** Securely delete a post from the repository.
 
-#### **Image Uploader**
-- Designed for uploading common image formats.
-- Similar to the post uploader, it features a **Directory Picker** to select the target folder (e.g., `public/images/`).
-- The allowed file types are configured as **`image/*`**, accepting most standard image formats.
-- After a successful image upload, the application generates and displays a ready-to-use Markdown snippet (e.g., `![alt text](/images/my-image.png)`) for easy copying and pasting into a post.
+#### **Create Post Tab**
+- A guided, step-by-step workflow for publishing a new post.
+- **Step 1: Upload Images:** Upload one or more images required for the new post.
+- **Step 2: Upload Post:** Upload the final `.md`/`.mdx` file.
+- **Validation:** The frontmatter of the uploaded post is automatically validated against either default rules or a user-defined template to ensure consistency.
+- **Publish:** Once validated, the post and any associated images are committed to the repository with a single click.
+
+#### **Template Tab**
+- Users can define a strict frontmatter validation template.
+- **Generation:** A template can be automatically generated by uploading an existing, well-structured post file. The app infers field names and data types (string, date, array, object).
+- **Management:** The active template is displayed and can be cleared to revert to default validation. Users can also download a sample Markdown file based on the template.
+
+#### **Backup Tab**
+- Provides functionality to download local backups of content.
+- Users can generate and download a `.zip` archive of either the entire posts directory or the images directory.
+
+#### **Settings Tab**
+- A centralized location for all configuration options.
+- **Paths:** Change the posts and images directory paths.
+- **Commit Messages:** Customize the templates used for commit messages for actions like creating/updating posts and images. Placeholders like `{filename}` are supported.
+- **File Types:** Modify the accepted file extensions/MIME types for post and image uploads.
 
 ## 3. How It Works: The Workflow
 
-1.  **Connect:** The user provides their GitHub PAT.
-2.  **Verify & Fetch:** The app sends a request to the GitHub API (`/user`) to verify the token. On success, it fetches the user's repositories.
-3.  **Select Repo:** The user selects a repository from the list.
-4.  **Set Paths:** The user navigates the repository filesystem using the Directory Picker modals to set the target paths for posts and images. By default, the path is the repository root (`/`).
-5.  **Choose File:** The user selects a local file to upload.
-6.  **Encode & Upload:** The application reads the file, converts it to a Base64 encoded string, and sends it to the GitHub Contents API (`PUT /repos/{owner}/{repo}/contents/{path}`).
-7.  **Commit:** This API call creates a new commit in the repository with the uploaded file. The commit message is automatically generated (e.g., `feat: add 'my-post.md' via Astro Content Manager`).
-8.  **Feedback:** The UI provides success or error messages to inform the user of the outcome.
+1.  **Connect:** The user provides their GitHub repository URL and a Fine-Grained PAT.
+2.  **Verify & Initialize:** The app verifies the token and repository permissions. It then scans for content directories to guide the user through a one-time setup.
+3.  **Manage:** The user interacts with the dashboard.
+4.  **API Calls:** All actions (reading, creating, updating, deleting files) are translated into corresponding GitHub REST API calls. Files are Base64 encoded before being sent.
+5.  **Commit:** Each action creates a new commit in the repository with a descriptive, configurable message.
+6.  **Feedback:** The UI provides real-time feedback, loading states, and success/error messages.
 
 ## 4. Technical Stack
 
-- **Framework:** **React 19** with TypeScript
+- **Framework:** **React** with TypeScript
 - **Styling:** **Tailwind CSS** for rapid, utility-first styling.
 - **API Interaction:** Native `fetch` API to interact with the **GitHub REST API**.
 - **State Management:** React Hooks (`useState`, `useEffect`, `useCallback`).
+- **Utilities:**
+  - **Marked & DOMPurify:** Used for rendering secure Markdown previews.
+  - **JSZip:** Used for creating `.zip` archives for the backup feature.
 - **No Build Step:** The project uses `ESM` modules via an import map in `index.html`, allowing it to run directly in modern browsers without a complex build process.
 
 ## 5. Project Structure
 
 ```
 .
-├── components/          # React components
-│   ├── icons/           # SVG icon components
-│   ├── ContentUploader.tsx
+├── components/              # React components
+│   ├── icons/               # SVG icon components
+│   ├── BackupManager.tsx
+│   ├── Dashboard.tsx        # Main dashboard container
 │   ├── DirectoryPicker.tsx
-│   ├── FileUploader.tsx
 │   ├── GithubConnect.tsx
-│   └── RepoSelector.tsx
-├── services/            # API interaction logic
+│   ├── NewPostCreator.tsx   # "Create" tab UI and logic
+│   ├── PostList.tsx         # "Manage" tab UI and logic
+│   ├── PostPreviewModal.tsx
+│   └── TemplateGenerator.tsx
+├── services/                # API interaction logic
 │   └── githubService.ts
-├── App.tsx              # Main application component
-├── index.html           # Entry point, includes Tailwind CSS and import map
-├── index.tsx            # Renders the React application
-├── types.ts             # TypeScript type definitions
-└── README.md            # You are here
+├── utils/                   # Helper functions
+│   ├── crypto.ts            # Encryption/decryption logic
+│   └── parsing.ts           # Markdown parsing, slugify, etc.
+├── App.tsx                  # Main application component
+├── index.html               # Entry point, includes Tailwind CSS and import map
+├── index.tsx                # Renders the React application
+├── types.ts                 # TypeScript type definitions
+└── README.md
 ```
 
 ## 6. Setup and Installation
@@ -81,8 +108,7 @@ As a purely client-side application, there is no server-side setup required.
 1.  **Prerequisites:** A modern web browser.
 2.  **Running the App:**
     - Clone or download the project files.
-    - You can open `index.html` directly in your browser. However, for full functionality, it's recommended to serve the files using a simple local web server to avoid potential issues with browser security policies.
-    - An easy way to do this is using the `http.server` module in Python or the `live-server` package from npm:
+    - Open `index.html` directly in your browser. For best results, serving the files with a simple local web server is recommended.
       ```bash
       # Using Python
       python -m http.server
@@ -90,5 +116,5 @@ As a purely client-side application, there is no server-side setup required.
       # Or using npm's live-server
       npx live-server
       ```
-3.  **Generate a GitHub Fine-Grained Token:** Go to your [GitHub Developer Settings](https://github.com/settings/tokens/new?type=beta) and generate a new "Fine-Grained" token. During setup, select the specific repository you want this tool to manage and grant it **Repository Permissions** for **"Contents"** with **"Read and write"** access. Copy this token.
-4.  **Use the App:** Open the running application in your browser and paste the token when prompted. You are now ready to manage your content.
+3.  **Generate a GitHub Fine-Grained Token:** Go to your [GitHub Developer Settings](https://github.com/settings/tokens/new?type=beta) and generate a new "Fine-Grained" token. Select the specific repository you want to manage and grant it **Repository Permissions** for **"Contents"** with **"Read and write"** access.
+4.  **Use the App:** Open the running application in your browser, paste your repository URL and the token, and start managing your content.

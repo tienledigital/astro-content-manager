@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Astro Content Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/"
+  }
+}
+</script>
+<style>
+  body.login-bg {
+    background-color: #f9fafb; /* gray-50 */
+    background-image: radial-gradient(circle at 1px 1px, #e5e7eb /* gray-200 */ 1px, transparent 0);
+    background-size: 20px 20px;
+  }
+  .markdown-preview h1, .markdown-preview h2, .markdown-preview h3, .markdown-preview h4, .markdown-preview h5, .markdown-preview h6 {
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+  }
+  .markdown-preview h1, .markdown-preview h2 {
+    border-bottom: 1px solid #d0d7de;
+    padding-bottom: .3em;
+  }
+  .markdown-preview h1 {
+    font-size: 2em;
+  }
+  .markdown-preview h2 {
+    font-size: 1.5em;
+  }
+  .markdown-preview p, .markdown-preview ul, .markdown-preview ol, .markdown-preview blockquote, .markdown-preview pre, .markdown-preview table {
+    margin-bottom: 1.25rem;
+  }
+  .markdown-preview ul, .markdown-preview ol {
+    padding-left: 2em;
+  }
+  .markdown-preview li {
+    margin-top: 0.25em;
+  }
+  .markdown-preview blockquote {
+    border-left: .25em solid #d0d7de;
+    padding: 0 1em;
+    color: #57606a;
+  }
+  .markdown-preview code:not(pre > code) {
+    background-color: rgba(27,31,36,0.07);
+    border-radius: 6px;
+    padding: .2em .4em;
+    font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+    font-size: 85%;
+  }
+  .markdown-preview pre {
+    background-color: #f6f8fa;
+    border-radius: 6px;
+    padding: 16px;
+    overflow: auto;
+  }
+  .markdown-preview pre > code {
+    background-color: transparent;
+    padding: 0;
+    font-size: 100%;
+  }
+  .markdown-preview table {
+    width: 100%;
+    border-collapse: collapse;
+    display: table;
+  }
+  .markdown-preview th, .markdown-preview td {
+    border: 1px solid #d0d7de;
+    padding: 6px 13px;
+  }
+  .markdown-preview tr {
+    border-top: 1px solid #d0d7de;
+  }
+    .markdown-preview tr:nth-child(2n) {
+    background-color: #f6f8fa;
+  }
+</style>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="text-gray-800 font-sans antialiased">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+</body>
+</html>

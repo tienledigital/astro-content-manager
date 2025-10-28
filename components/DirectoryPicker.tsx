@@ -5,6 +5,7 @@ import { SpinnerIcon } from './icons/SpinnerIcon';
 import { FolderIcon } from './icons/FolderIcon';
 import { FileIcon } from './icons/FileIcon';
 import { ArrowUpIcon } from './icons/ArrowUpIcon';
+import { useI18n } from '../i18n/I18nContext';
 
 interface DirectoryPickerProps {
   token: string;
@@ -19,6 +20,7 @@ const DirectoryPicker: React.FC<DirectoryPickerProps> = ({ token, repo, onClose,
   const [contents, setContents] = useState<GithubContent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useI18n();
 
   const fetchContents = useCallback(async (path: string) => {
     setIsLoading(true);
@@ -32,11 +34,11 @@ const DirectoryPicker: React.FC<DirectoryPickerProps> = ({ token, repo, onClose,
       });
       setContents(sortedItems);
     } catch (err) {
-      setError('Failed to fetch directory contents. The path might not exist.');
+      setError(t('directoryPicker.error'));
     } finally {
       setIsLoading(false);
     }
-  }, [token, repo]);
+  }, [token, repo, t]);
 
   useEffect(() => {
     fetchContents(currentPath);
@@ -59,8 +61,8 @@ const DirectoryPicker: React.FC<DirectoryPickerProps> = ({ token, repo, onClose,
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
         <header className="p-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-800">Select a Directory</h3>
-          <p className="text-sm text-gray-500 break-all">Current Path: /{currentPath}</p>
+          <h3 className="text-lg font-semibold text-gray-800">{t('directoryPicker.title')}</h3>
+          <p className="text-sm text-gray-500 break-all">{t('directoryPicker.currentPath')} /{currentPath}</p>
         </header>
 
         <div className="p-4 overflow-y-auto flex-grow">
@@ -101,21 +103,21 @@ const DirectoryPicker: React.FC<DirectoryPickerProps> = ({ token, repo, onClose,
             className="inline-flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ArrowUpIcon className="w-4 h-4 mr-2" />
-            Go Up
+            {t('directoryPicker.goUp')}
           </button>
           <div>
             <button
                 onClick={onClose}
                 className="mr-2 bg-white hover:bg-gray-100 text-gray-800 font-bold py-2 px-4 rounded border border-gray-300 transition duration-200"
             >
-                Cancel
+                {t('directoryPicker.cancel')}
             </button>
             <button
                 onClick={() => onSelect(currentPath)}
                 disabled={isLoading || !!error}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200 disabled:opacity-50"
             >
-                Select this Directory
+                {t('directoryPicker.select')}
             </button>
           </div>
         </footer>
