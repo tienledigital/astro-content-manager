@@ -214,37 +214,38 @@ export const getFileAsBlob = async (
 
 const ignoredDirs = new Set(['node_modules', '.git', '.github', 'dist', 'build', 'vendor', '.vscode', 'pages', 'page']);
 
-async function scanDirectory(
+async function scanDirectoryGeneric(
     token: string,
     owner: string,
     repo: string,
     path: string,
     depth: number,
     maxDepth: number,
-    foundDirs: Set<string>
+    foundDirs: Set<string>,
+    fileCheck: (filename: string) => boolean
 ) {
     if (depth >= maxDepth) return;
 
     try {
         const contents = await getRepoContents(token, owner, repo, path);
-        let hasMarkdown = false;
+        let hasMatchingFile = false;
         const subDirs: GithubContent[] = [];
 
         for (const item of contents) {
-            if (item.type === 'file' && (item.name.endsWith('.md') || item.name.endsWith('.mdx'))) {
-                hasMarkdown = true;
+            if (item.type === 'file' && fileCheck(item.name)) {
+                hasMatchingFile = true;
             } else if (item.type === 'dir' && !ignoredDirs.has(item.name.toLowerCase())) {
                 subDirs.push(item);
             }
         }
 
-        if (hasMarkdown && path) { // Only add if it's not the root directory
+        if (hasMatchingFile && path) { // Only add if it's not the root directory
             foundDirs.add(path);
         }
 
         // Recursively scan subdirectories in parallel
         await Promise.all(
-            subDirs.map(dir => scanDirectory(token, owner, repo, dir.path, depth + 1, maxDepth, foundDirs))
+            subDirs.map(dir => scanDirectoryGeneric(token, owner, repo, dir.path, depth + 1, maxDepth, foundDirs, fileCheck))
         );
 
     } catch (error) {
@@ -252,30 +253,19 @@ async function scanDirectory(
     }
 }
 
-
-export const scanForContentDirectories = async (
-  token: string,
-  owner: string,
-  repo: string,
-): Promise<string[]> => {
-    const foundDirs = new Set<string>();
-    // Scan only within the 'src' directory for content folders.
-    await scanDirectory(token, owner, repo, 'src', 0, 3, foundDirs);
+const sortPaths = (paths: string[], preferredNames: string[]): string[] => {
+    const results = Array.from(paths);
     
-    const results = Array.from(foundDirs);
-    const preferredDirNames = ['posts', 'post', 'blog', 'content', 'data', 'articles'];
-
     results.sort((a, b) => {
         const aLastName = a.split('/').pop()?.toLowerCase() || '';
         const bLastName = b.split('/').pop()?.toLowerCase() || '';
 
-        const aIsPreferred = preferredDirNames.includes(aLastName);
-        const bIsPreferred = preferredDirNames.includes(bLastName);
+        const aIsPreferred = preferredNames.includes(aLastName);
+        const bIsPreferred = preferredNames.includes(bLastName);
 
         if (aIsPreferred && !bIsPreferred) return -1;
         if (!aIsPreferred && bIsPreferred) return 1;
         
-        // If both or neither are preferred, sort by depth (shallower first), then alphabetically
         const aDepth = a.split('/').length;
         const bDepth = b.split('/').length;
         if (aDepth !== bDepth) {
@@ -287,3 +277,141 @@ export const scanForContentDirectories = async (
     
     return results;
 }
+
+export const scanForContentDirectories = async (
+  token: string,
+  owner: string,
+  repo: string,
+): Promise<string[]> => {
+    const foundDirs = new Set<string>();
+    await scanDirectoryGeneric(
+      token, owner, repo, '', 0, 4, foundDirs,
+      (name) => name.endsWith('.md') || name.endsWith('.mdx')
+    );
+    
+    const preferredDirNames = ['posts', 'post', 'blog', 'content', 'data', 'articles'];
+    return sortPaths(Array.from(foundDirs), preferredDirNames);
+}
+
+export const scanForImageDirectories = async (
+  token: string,
+  owner: string,
+  repo: string,
+): Promise<string[]> => {
+    const foundDirs = new Set<string>();
+    await scanDirectoryGeneric(
+      token, owner, repo, '', 0, 4, foundDirs,
+      (name) => /\.(jpe?g|png|gif|webp|svg)$/i.test(name)
+    );
+    
+    const preferredDirNames = ['images', 'assets', 'static', 'public'];
+    const sorted = sortPaths(Array.from(foundDirs), preferredDirNames);
+
+    // Give special priority to 'public/images'
+    const publicImagesIndex = sorted.findIndex(p => p.toLowerCase() === 'public/images');
+    if (publicImagesIndex > 0) {
+        const [publicImagesPath] = sorted.splice(publicImagesIndex, 1);
+        sorted.unshift(publicImagesPath);
+    }
+
+    return sorted;
+}
+
+export const findProductionUrl = async (
+  token: string,
+  owner: string,
+  repo: string
+): Promise<string | null> => {
+  // Regex for JS/TS/MJS config files looking for `site: '...'`
+  const jsSiteRegex = /site\s*:\s*['"](https?:\/\/[^'"]+)['"]/;
+  
+  // Regex for YAML files looking for `site: ...` or `url: ...`, allowing for indentation
+  const yamlSiteRegex = /^\s*(?:site|url)\s*:\s*['"]?(https?:\/\/[^'"\s]+)['"]?/m; // m for multiline
+
+  const filesToScan = [
+    { path: 'astro.config.mjs', regex: jsSiteRegex },
+    { path: 'astro.config.ts', regex: jsSiteRegex },
+    { path: 'astro.config.js', regex: jsSiteRegex },
+    { path: 'src/config.yaml', regex: yamlSiteRegex },
+    { path: 'src/config.yml', regex: yamlSiteRegex },
+    { path: 'src/config.ts', regex: jsSiteRegex },
+    { path: 'src/config.js', regex: jsSiteRegex },
+  ];
+
+  for (const file of filesToScan) {
+    try {
+      const content = await getFileContent(token, owner, repo, file.path);
+      const match = content.match(file.regex);
+      if (match && match[1]) {
+        // Return the first captured group, trimming any trailing slashes for consistency
+        return match[1].replace(/\/$/, '');
+      }
+    } catch (error) {
+      // File not found, continue to the next one
+    }
+  }
+
+  // Fallback to package.json
+  try {
+    const content = await getFileContent(token, owner, repo, 'package.json');
+    const pkg = JSON.parse(content);
+    if (pkg.homepage && typeof pkg.homepage === 'string' && pkg.homepage.startsWith('http')) {
+      return pkg.homepage.replace(/\/$/, '');
+    }
+  } catch (error) {
+    // package.json not found or parsing failed
+  }
+  
+  return null;
+};
+
+export interface RepoTreeItem {
+  path: string;
+  name: string;
+  type: 'dir' | 'file';
+  hasMarkdown?: boolean; // For directories, indicates if it contains .md/.mdx files
+}
+
+const ignoredTreeDirs = new Set(['node_modules', '.git', '.github', 'dist', 'build', 'vendor', '.vscode']);
+
+export const getRepoTree = async (
+  token: string,
+  owner: string,
+  repo: string,
+  path: string = ''
+): Promise<RepoTreeItem[]> => {
+  const contents = await getRepoContents(token, owner, repo, path);
+
+  const processedItems = await Promise.all(
+    contents.map(async (item): Promise<RepoTreeItem | null> => {
+      if (ignoredTreeDirs.has(item.name.toLowerCase())) {
+        return null;
+      }
+      if (item.type === 'dir') {
+        try {
+          // Check if the directory contains markdown files for a visual hint
+          const subContents = await getRepoContents(token, owner, repo, item.path);
+          const hasMarkdown = subContents.some(subItem =>
+            subItem.type === 'file' && (subItem.name.endsWith('.md') || subItem.name.endsWith('.mdx'))
+          );
+          return { path: item.path, name: item.name, type: 'dir', hasMarkdown };
+        } catch (e) {
+          // Can happen if directory is empty or inaccessible
+          return { path: item.path, name: item.name, type: 'dir', hasMarkdown: false };
+        }
+      }
+      return { path: item.path, name: item.name, type: 'file' };
+    })
+  );
+
+  const validItems = processedItems.filter((item): item is RepoTreeItem => item !== null);
+
+  // Sort: folders first, then files, then alphabetically
+  validItems.sort((a, b) => {
+    if (a.type === 'dir' && b.type !== 'dir') return -1;
+    if (a.type !== 'dir' && b.type === 'dir') return 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  return validItems;
+};

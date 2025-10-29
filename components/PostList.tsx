@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { GithubRepo } from '../types';
 import * as githubService from '../services/githubService';
 import { parseMarkdown, updateFrontmatter, ParsedMarkdown } from '../utils/parsing';
+import { compressImage } from '../utils/image';
 import { SpinnerIcon } from './icons/SpinnerIcon';
 import { ImageIcon } from './icons/ImageIcon';
 import { EditIcon } from './icons/EditIcon';
@@ -10,6 +11,7 @@ import { TrashIcon } from './icons/TrashIcon';
 import PostPreviewModal from './PostPreviewModal';
 import { SearchIcon } from './icons/SearchIcon';
 import { useI18n } from '../i18n/I18nContext';
+import { ExclamationTriangleIcon } from './icons/ExclamationTriangleIcon';
 
 
 interface PostListProps {
@@ -17,11 +19,16 @@ interface PostListProps {
   repo: GithubRepo;
   path: string;
   imagesPath: string;
+  domainUrl: string;
+  projectType: 'astro' | 'github';
   onPostUpdate: (filePath: string, file: File) => Promise<void>;
   postFileTypes: string;
   imageFileTypes: string;
   newImageCommitTemplate: string;
   updatePostCommitTemplate: string;
+  imageCompressionEnabled: boolean;
+  maxImageSize: number;
+  imageResizeMaxWidth: number;
 }
 
 export interface PostData extends ParsedMarkdown {
@@ -34,9 +41,63 @@ export interface PostData extends ParsedMarkdown {
 
 const POSTS_PER_PAGE = 20;
 
+const ThumbnailWithAuth: React.FC<{ token: string, repo: GithubRepo, imagePath: string }> = ({ token, repo, imagePath }) => {
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        // If it's a full URL, just use it directly. No need to fetch via API.
+        if (imagePath.startsWith('http')) {
+            setImageUrl(imagePath);
+            setIsLoading(false);
+            return;
+        }
+
+        let isMounted = true;
+        let objectUrl: string | null = null;
+
+        const fetchBlob = async () => {
+            setIsLoading(true);
+            const fullPath = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
+            try {
+                const blob = await githubService.getFileAsBlob(token, repo.owner.login, repo.name, fullPath);
+                if (isMounted) {
+                    objectUrl = URL.createObjectURL(blob);
+                    setImageUrl(objectUrl);
+                }
+            } catch (e) {
+                console.error(`Failed to fetch blob for ${fullPath}`, e);
+                if (isMounted) setImageUrl(null);
+            } finally {
+                if (isMounted) setIsLoading(false);
+            }
+        };
+
+        fetchBlob();
+
+        return () => {
+            isMounted = false;
+            if (objectUrl) {
+                URL.revokeObjectURL(objectUrl);
+            }
+        };
+    }, [token, repo, imagePath]);
+    
+    if (isLoading) {
+        return <div className="flex items-center justify-center w-full h-full"><SpinnerIcon className="w-6 h-6 animate-spin text-gray-400" /></div>;
+    }
+
+    if (!imageUrl) {
+        return <ImageIcon className="h-10 w-10 text-gray-300" />;
+    }
+
+    return <img src={imageUrl} alt="Thumbnail" className="h-full w-full object-cover" />;
+};
+
 const PostList: React.FC<PostListProps> = ({ 
-    token, repo, path, imagesPath, onPostUpdate, 
-    postFileTypes, imageFileTypes, newImageCommitTemplate, updatePostCommitTemplate 
+    token, repo, path, imagesPath, domainUrl, projectType, onPostUpdate, 
+    postFileTypes, imageFileTypes, newImageCommitTemplate, updatePostCommitTemplate,
+    imageCompressionEnabled, maxImageSize, imageResizeMaxWidth
 }) => {
   const [posts, setPosts] = useState<PostData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,6 +106,7 @@ const PostList: React.FC<PostListProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const { t } = useI18n();
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
   const mdFileInputRef = useRef<HTMLInputElement>(null);
   const imageFileInputRef = useRef<HTMLInputElement>(null);
@@ -150,12 +212,24 @@ const PostList: React.FC<PostListProps> = ({
     setError(null);
 
     try {
-      const imageCommitMessage = newImageCommitTemplate.replace('{filename}', imageFile.name);
-      const fullImagePath = imagesPath ? `${imagesPath}/${imageFile.name}` : imageFile.name;
-      await githubService.uploadFile(token, repo.owner.login, repo.name, fullImagePath, imageFile, imageCommitMessage);
+      const fileToUpload = imageCompressionEnabled
+        ? await compressImage(imageFile, maxImageSize, imageResizeMaxWidth)
+        : imageFile;
 
-      const publicPath = imagesPath.startsWith('public/') ? imagesPath.substring('public/'.length) : imagesPath;
-      const newImageUrl = publicPath ? `/${publicPath}/${imageFile.name}` : `/${imageFile.name}`;
+      const imageCommitMessage = newImageCommitTemplate.replace('{filename}', fileToUpload.name);
+      const fullImagePath = imagesPath ? `${imagesPath}/${fileToUpload.name}` : fileToUpload.name;
+      await githubService.uploadFile(token, repo.owner.login, repo.name, fullImagePath, fileToUpload, imageCommitMessage);
+
+      // This path logic is for web projects (Astro/Next.js).
+      // For GitHub Library mode, the user should ideally use the full repo path in frontmatter.
+      let publicPath = imagesPath;
+      if (publicPath.startsWith('public/')) {
+          publicPath = publicPath.substring('public/'.length);
+      } else if (publicPath === 'public') {
+          publicPath = '';
+      }
+      const urlParts = [publicPath, fileToUpload.name].filter(Boolean);
+      const newImageUrl = `/${urlParts.join('/')}`;
 
       const newContent = updateFrontmatter(changingImageForPost.rawContent, { image: newImageUrl });
 
@@ -191,14 +265,32 @@ const PostList: React.FC<PostListProps> = ({
     }
   };
 
-  const resolveImageUrl = (thumbnailUrl: string | null) => {
-      if (!thumbnailUrl) return null;
-      if (thumbnailUrl.startsWith('http')) return thumbnailUrl;
-      if (thumbnailUrl.startsWith('/')) {
-        return `https://raw.githubusercontent.com/${repo.full_name}/${repo.default_branch}/public${thumbnailUrl}`;
-      }
-      return `https://raw.githubusercontent.com/${repo.full_name}/${repo.default_branch}/${path}/${thumbnailUrl}`;
-  }
+  const resolveImageUrl = (thumbnailUrl: string | null): string | null | 'needs-domain' => {
+    if (!thumbnailUrl) return null;
+
+    if (thumbnailUrl.startsWith('http')) {
+        return thumbnailUrl;
+    }
+    
+    // In github mode, if repo is private, component handles it. If public, we generate URL.
+    if (projectType === 'github') {
+        if (repo.private) return thumbnailUrl; // Path for the component
+        const path = thumbnailUrl.startsWith('/') ? thumbnailUrl : `/${thumbnailUrl}`;
+        return `https://raw.githubusercontent.com/${repo.full_name}/${repo.default_branch}${path}`;
+    }
+
+    // Astro/Next.js (web project) logic
+    if (thumbnailUrl.startsWith('/')) {
+        if (domainUrl) {
+            return `${domainUrl.replace(/\/$/, '')}${thumbnailUrl}`;
+        } else {
+            return 'needs-domain';
+        }
+    }
+    
+    // Cannot resolve relative paths reliably without more context for web projects.
+    return null;
+  };
 
   const renderValue = (key: string, value: any) => {
     if (Array.isArray(value) && value.length > 0) {
@@ -300,11 +392,22 @@ const PostList: React.FC<PostListProps> = ({
               return (
               <div key={post.sha} className="bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col overflow-hidden transition-shadow duration-300 hover:shadow-xl">
                   <div className="relative h-40 bg-gray-100 flex items-center justify-center overflow-hidden">
-                      {post.thumbnailUrl ? (
-                          <img src={resolveImageUrl(post.thumbnailUrl) || ''} alt={post.frontmatter.title || 'Thumbnail'} className="h-full w-full object-cover" />
-                      ) : (
-                          <ImageIcon className="h-10 w-10 text-gray-300" />
-                      )}
+                      { projectType === 'github' && repo.private && post.thumbnailUrl ? (
+                          <ThumbnailWithAuth token={token} repo={repo} imagePath={post.thumbnailUrl} />
+                      ) : (() => {
+                          const resolvedUrl = resolveImageUrl(post.thumbnailUrl);
+                          return resolvedUrl === 'needs-domain' ? (
+                              <div className="p-2 text-center text-xs text-yellow-800 bg-yellow-50 flex items-center">
+                                <ExclamationTriangleIcon className="w-6 h-6 mr-2 flex-shrink-0" />
+                                {t('postList.error.setImageDomain')}
+                              </div>
+                          ) : resolvedUrl && !imageErrors[post.sha] ? (
+                              <img src={resolvedUrl} alt={post.frontmatter.title || 'Thumbnail'} className="h-full w-full object-cover" onError={() => setImageErrors(prev => ({...prev, [post.sha]: true}))} />
+                          ) : (
+                              <ImageIcon className="h-10 w-10 text-gray-300" />
+                          );
+                      })()}
+
                       {isUpdating === post.sha && (
                           <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center">
                               <SpinnerIcon className="h-8 w-8 animate-spin text-blue-600" />

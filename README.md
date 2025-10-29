@@ -1,7 +1,12 @@
+
 # Astro Content Manager
-> Current Version: 1.3.1
+> Current Version: 1.3.2
 
 A simple, clean web interface to upload Markdown/MDX posts and images directly to your Astro project's GitHub repository. Streamline your content workflow without leaving the browser.
+
+![Astro Content Manager Preview](.github/assets/app-preview.png)
+
+---
 
 ## ✨ Key Features
 
@@ -9,9 +14,11 @@ A simple, clean web interface to upload Markdown/MDX posts and images directly t
 - **Smart Initial Setup:** Automatically scans your repository to suggest content directories, getting you started faster.
 - **Comprehensive Post Management:** A powerful dashboard to list, search, preview, and update existing posts.
 - **Streamlined Post Creation:** A guided, step-by-step workflow for publishing new posts, complete with image uploads.
+- **Image Management:** Browse, search, copy production-ready URLs, and delete images from your assets directory to keep your repository clean.
 - **Frontmatter Validation:** Define a custom template from an existing post to enforce consistent structure for all new content.
+- **Multi-language Support:** Fully localized interface supporting English (en) and Vietnamese (vi).
 - **Content Backup:** Easily download `.zip` archives of your posts and images directories.
-- **Highly Configurable:** Customize content paths, commit message templates, and more in the settings panel.
+- **Highly Configurable:** Customize content paths, commit message templates, image compression, and more in the settings panel.
 
 ---
 

@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.2] - 2024-05-27
+
+### Added
+- **Multi-language Support:** The entire UI now supports English (en) and Vietnamese (vi), with language selection saved locally.
+- **Image Compression:** Added settings to enable automatic image compression and set a maximum file size limit for uploads.
+- **Image Manager:** A new "Manage Images" tab in the dashboard to list, search, preview, and delete images from the assets directory.
+
+### Changed
+- **Improved Setup Wizard:** The initial setup process has been significantly improved. It now automatically scans for and suggests both post and image directories, and pre-selects the best guess to streamline the configuration process for the user.
+- **Flexible Logout Flow:** The logout functionality has been redesigned. It now presents a confirmation dialog with an option to **also reset all saved settings**, providing a clear and flexible way for users to log out or start fresh.
+
+### Fixed
+- Corrected an issue where an incorrect image URL was generated when the `imagesPath` was set directly to 'public', ensuring proper resolution of cover images in the post list.
+
 ## [1.3.1] - 2024-05-26
 
 ### Changed

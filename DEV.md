@@ -49,9 +49,16 @@ Chào bạn, tôi là kỹ sư frontend của bạn đây. Rất vui được gi
     *   **Dashboard.tsx**: Component chính sau khi đăng nhập, chứa các tab chức năng.
     *   **PostList.tsx**: Hiển thị danh sách các bài viết dưới dạng thẻ (card), có chức năng tìm kiếm, phân trang và các nút hành động (sửa, xóa, xem trước).
     *   **NewPostCreator.tsx**: Giao diện theo từng bước để tạo một bài viết mới. Nó có chức năng xác thực (validate) frontmatter dựa trên một "template" để đảm bảo tính nhất quán.
+    *   **ImageList.tsx**: Hiển thị danh sách hình ảnh trong thư mục tài sản, cho phép tìm kiếm, xem trước, sao chép URL và xóa.
     *   **TemplateGenerator.tsx**: Một tính năng nâng cao cho phép bạn tạo một mẫu frontmatter chuẩn bằng cách tải lên một bài viết đã có. Các bài viết mới sau này sẽ phải tuân theo mẫu này.
     *   **BackupManager.tsx**: Cung cấp chức năng tải về bản sao lưu của thư mục bài viết hoặc hình ảnh dưới dạng file .zip.
     *   **DirectoryPicker.tsx**: Một cửa sổ (modal) trực quan giúp người dùng duyệt qua cấu trúc thư mục trên repo và chọn một thư mục.
+*   **i18n/**: Thư mục quản lý đa ngôn ngữ.
+    *   **translations.ts**: Chứa tất cả các chuỗi văn bản (text strings) cho cả tiếng Anh và tiếng Việt. Đây là nơi duy nhất để thêm hoặc sửa đổi văn bản hiển thị trên UI.
+    *   **I18nContext.tsx**: Tạo một React Context để cung cấp hàm dịch (`t`) và trạng thái ngôn ngữ hiện tại cho toàn bộ ứng dụng. Component `LanguageSwitcher` cũng sử dụng context này để thay đổi ngôn ngữ.
+
+### Hệ thống Đa ngôn ngữ (Internationalization - i18n)
+Ứng dụng hỗ trợ đầy đủ tiếng Anh và tiếng Việt. Logic được quản lý trong thư mục `i18n/`. Khi bạn cần thêm một văn bản mới, hãy thêm key và giá trị tương ứng cho cả hai ngôn ngữ trong file `translations.ts`, sau đó gọi hàm `t('your.key')` từ hook `useI18n()` trong component của bạn. Ngôn ngữ được chọn sẽ được lưu vào `localStorage` để duy trì qua các phiên làm việc.
 ### Cập nhật Ứng dụng
 Vì đây là một ứng dụng hoạt động hoàn toàn phía trình duyệt (client-side) và không cần bước build, việc cập nhật lên phiên bản mới nhất rất đơn giản.
 Nếu bạn đã sao chép (clone) dự án từ GitHub, bạn chỉ cần đi đến thư mục dự án trên máy tính và chạy lệnh sau để lấy về các cập nhật mới nhất từ nhánh `main`:
