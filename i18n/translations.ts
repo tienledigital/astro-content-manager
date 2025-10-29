@@ -1,8 +1,14 @@
-
 export const translations = {
   en: {
     app: {
       logout: 'Log Out',
+      logoutConfirm: {
+        title: 'Confirm Logout',
+        description: 'Are you sure you want to end your session?',
+        resetLabel: 'Also delete all saved settings',
+        resetHelp: 'This will remove all saved paths, templates, and commit settings from your browser. This action cannot be undone.',
+        cancel: 'Cancel',
+      },
       error: {
         unknown: 'An unknown error occurred.',
         invalidRepoUrl: 'Invalid GitHub repository URL. Please check and try again.',
@@ -43,6 +49,7 @@ export const translations = {
       nav: {
         manage: 'Manage Posts',
         create: 'Create Post',
+        manageImages: 'Manage Images',
         template: 'Post Template',
         backup: 'Backup',
         settings: 'Settings',
@@ -50,23 +57,55 @@ export const translations = {
         menuTitle: 'Menu',
       },
       setup: {
-        title: 'Initial Setup Required',
-        scanning: 'Scanning repository for content directories...',
-        suggestionsTitle: 'Suggested Directories',
-        suggestionsDesc: 'We found these directories containing markdown files. Select one to get started.',
-        suggestionsDefaultDesc: "We couldn't find any content folders, but a common 'src/data/post' directory exists. You can select it to get started.",
-        noSuggestions: "Could not automatically find a posts directory. Please select the directory where your blog posts (`.md`/`.mdx` files) are stored.",
-        manualOption: 'Or, select a different directory manually.',
-        manualButton: 'Select Directory Manually',
-        saveNote: 'This setting will be saved for this repository in your browser.',
+        scanning: 'Scanning repository for initial configuration...',
+        wizardTitle: 'Project Setup',
+        wizardDesc: 'Configure your project to start managing content.',
+        explorerTitle: 'Repository Explorer',
+        explorerHint: 'Folders with a ★ are suggested based on their content.',
+        configTitle: 'Configuration',
+        finishButton: 'Finish Setup',
+        projectTypeDesc: "Choose how you use this repository. This determines how image previews are handled.",
+        projectTypeAstroName: "Web Project",
+        projectTypeAstroDesc: "For a deployed website like Astro or Next.js. Requires a production domain to preview images.",
+        projectTypeGithubName: "GitHub File Library",
+        projectTypeGithubDesc: "For managing a collection of files. Previews link directly to raw GitHub files.",
+        suggestionsDesc: "We've detected these content directories. Click one to select it. The first suggestion has been pre-selected for you.",
+        imagesSuggestionsDesc: "We've also found these image directories. The best suggestion has been pre-selected.",
+        noSuggestions: "Could not automatically find a posts directory.",
+        noImageSuggestions: "Could not automatically find an image directory. You can set one later in Settings.",
+        selectFromTree: "Please select a directory from the explorer on the left.",
+        domainHelp: 'This is required to preview images correctly. We tried to auto-detect it for you.',
       },
       settings: {
+        saveButton: 'Save Settings',
+        saveSuccess: 'Settings saved!',
+        projectType: {
+          title: 'Project Type',
+          label: 'Select your project type',
+          help: 'Changing this affects how image URLs are resolved for previews.',
+        },
+        domain: {
+          title: 'Website Domain',
+          label: 'Production Domain URL',
+          help: 'Used to correctly preview images with root-relative paths (e.g., /images/my-image.jpg).',
+          warning: 'Important: This URL is critical for previewing images in the "Manage Posts" and "Manage Images" tabs. An incorrect URL will result in broken images.'
+        },
         directories: {
           title: 'Directory Settings',
           postsLabel: 'Posts Directory',
           imagesLabel: 'Images Directory',
           notSelected: 'Not selected',
           changeButton: 'Change',
+        },
+        compression: {
+            title: 'Image Compression',
+            enableLabel: 'Enable Compression & Resizing',
+            enableHelp: 'Automatically process images that exceed the maximum size or width before uploading.',
+            maxSizeLabel: 'Max Image Size (MB)',
+            maxSizeHelp: 'Images larger than this will be compressed to JPEG format.',
+            resizeLabel: 'Resize large images',
+            resizeHelp: 'Resize images where the width exceeds this value. Aspect ratio is maintained.',
+            originalSize: 'Keep original size',
         },
         creation: {
             title: 'Post Creation Settings',
@@ -90,6 +129,15 @@ export const translations = {
           imageLabel: 'Image File Types',
           imageHelp: 'Example: `image/*` for all image types.',
         },
+        dangerZone: {
+          title: 'Danger Zone',
+          description: "This action will permanently delete all your saved settings for this application from your browser's local storage and reload the page. This is useful if you want to start fresh.",
+          descriptionLogout: "This action will permanently delete all your saved settings, log you out of the application, and return you to the connect screen. This is useful if you want to start fresh.",
+          resetButton: 'Reset All Settings',
+          resetButtonLogout: 'Reset & Log Out',
+          confirm: 'Are you sure you want to reset all settings? This cannot be undone.',
+          confirmLogout: 'Are you sure you want to reset all settings and log out? This cannot be undone.',
+        }
       },
       footer: {
         sponsoredBy: 'Sponsored by',
@@ -107,6 +155,7 @@ export const translations = {
         loading: 'Loading posts...',
         error: {
             dirNotFound: 'Directory not found: \'{{path}}\'. Please make sure this directory exists in your repository. You can change the target directory from the Settings tab.',
+            setImageDomain: "Image not loaded. Please set your website's main domain in Settings to preview images correctly.",
         },
         noPosts: 'No posts found in the selected directory.',
         searchPlaceholder: 'Search by title, author, category, tag...',
@@ -123,6 +172,35 @@ export const translations = {
             next: 'Next',
         },
         deleteConfirm: 'Are you sure you want to delete "{{name}}"? This action cannot be undone.',
+    },
+    imageList: {
+        loading: 'Loading images...',
+        error: {
+            dirNotFound: 'Image directory not found: \'{{path}}\'. Please check the path in Settings.',
+            domainNotSetTitle: 'Website Domain Not Set',
+            domainNotSetDescription: 'To preview images, please go to the Settings tab and enter your website\'s production domain URL.',
+        },
+        noImages: 'No images found in the selected directory.',
+        searchPlaceholder: 'Search by filename...',
+        noResults: 'No images found for your search.',
+        deleteConfirm: 'Are you sure you want to delete "{{name}}"? This can break existing posts if the image is in use.',
+        fileSize: 'Size',
+        delete: 'Delete',
+        copyUrlButton: 'Copy URL',
+        urlCopied: 'Copied!',
+        infoBanner: {
+          title: 'Viewing as a File Library',
+          description: 'Image previews are fetched directly from your repository, and now work for private repositories too. To preview images as they would appear on a live site, change the "Project Type" to a Web Project in Settings and provide a domain URL.',
+        },
+        infoBannerWeb: {
+            title: 'Viewing as a Web Project',
+            description: 'URLs are formatted for your live website. Click "Copy URL" to get a production-ready link to paste into your posts.',
+        },
+        pagination: {
+            prev: 'Previous',
+            pageInfo: 'Page {{current}} of {{total}}',
+            next: 'Next',
+        },
     },
     postPreview: {
         tabMetadata: 'Metadata',
@@ -340,6 +418,13 @@ export const translations = {
   vi: {
     app: {
       logout: 'Đăng Xuất',
+      logoutConfirm: {
+        title: 'Xác nhận Đăng xuất',
+        description: 'Bạn có chắc chắn muốn kết thúc phiên làm việc không?',
+        resetLabel: 'Đồng thời xóa tất cả cài đặt đã lưu',
+        resetHelp: 'Thao tác này sẽ xóa tất cả các đường dẫn, mẫu, và cài đặt commit đã lưu khỏi trình duyệt của bạn. Hành động này không thể hoàn tác.',
+        cancel: 'Hủy',
+      },
       error: {
         unknown: 'Đã xảy ra lỗi không xác định.',
         invalidRepoUrl: 'URL kho chứa GitHub không hợp lệ. Vui lòng kiểm tra lại.',
@@ -380,6 +465,7 @@ export const translations = {
       nav: {
         manage: 'Quản lý Bài viết',
         create: 'Tạo Bài viết',
+        manageImages: 'Quản lý Hình ảnh',
         template: 'Mẫu Bài viết',
         backup: 'Sao lưu',
         settings: 'Cài đặt',
@@ -387,23 +473,55 @@ export const translations = {
         menuTitle: 'Trình đơn',
       },
       setup: {
-        title: 'Yêu cầu Cài đặt Ban đầu',
-        scanning: 'Đang quét kho chứa để tìm thư mục nội dung...',
-        suggestionsTitle: 'Thư mục được gợi ý',
-        suggestionsDesc: 'Chúng tôi đã tìm thấy các thư mục chứa file markdown. Hãy chọn một thư mục để bắt đầu.',
-        suggestionsDefaultDesc: 'Chúng tôi không tìm thấy thư mục nội dung nào, nhưng có một thư mục phổ biến là \'src/data/post\'. Bạn có thể chọn nó để bắt đầu.',
-        noSuggestions: 'Không thể tự động tìm thấy thư mục bài viết. Vui lòng chọn thư mục chứa các bài viết blog (`.md`/`.mdx`) của bạn.',
-        manualOption: 'Hoặc, chọn một thư mục khác theo cách thủ công.',
-        manualButton: 'Chọn Thư mục Thủ công',
-        saveNote: 'Cài đặt này sẽ được lưu cho kho chứa này trong trình duyệt của bạn.',
+        scanning: 'Đang quét kho chứa để lấy cấu hình ban đầu...',
+        wizardTitle: 'Cài đặt Dự án',
+        wizardDesc: 'Cấu hình dự án của bạn để bắt đầu quản lý nội dung.',
+        explorerTitle: 'Trình khám phá Kho chứa',
+        explorerHint: 'Các thư mục có dấu ★ được gợi ý dựa trên nội dung của chúng.',
+        configTitle: 'Cấu hình',
+        finishButton: 'Hoàn tất Cài đặt',
+        projectTypeDesc: "Chọn cách bạn sử dụng kho chứa này. Điều này quyết định cách xem trước hình ảnh.",
+        projectTypeAstroName: "Dự án Web",
+        projectTypeAstroDesc: "Dành cho một website đã triển khai như Astro hoặc Next.js. Yêu cầu tên miền production để xem trước ảnh.",
+        projectTypeGithubName: "Thư viện File trên GitHub",
+        projectTypeGithubDesc: "Dành cho quản lý bộ sưu tập file. Ảnh xem trước sẽ liên kết trực tiếp đến GitHub.",
+        suggestionsDesc: "Chúng tôi đã phát hiện các thư mục nội dung này. Nhấp vào một thư mục để chọn. Gợi ý đầu tiên đã được chọn sẵn cho bạn.",
+        imagesSuggestionsDesc: "Chúng tôi cũng đã tìm thấy các thư mục hình ảnh này. Gợi ý tốt nhất đã được chọn sẵn.",
+        noSuggestions: 'Không thể tự động tìm thấy thư mục bài viết.',
+        noImageSuggestions: 'Không thể tự động tìm thấy thư mục hình ảnh. Bạn có thể đặt sau trong Cài đặt.',
+        selectFromTree: 'Vui lòng chọn một thư mục từ trình khám phá bên trái.',
+        domainHelp: 'Điều này là bắt buộc để xem trước hình ảnh. Chúng tôi đã cố gắng tự động phát hiện nó cho bạn.',
       },
       settings: {
+        saveButton: 'Lưu Cài đặt',
+        saveSuccess: 'Đã lưu cài đặt!',
+        projectType: {
+          title: 'Loại Dự án',
+          label: 'Chọn loại dự án của bạn',
+          help: 'Thay đổi tùy chọn này sẽ ảnh hưởng đến cách URL hình ảnh được hiển thị để xem trước.',
+        },
+        domain: {
+          title: 'Tên miền Website',
+          label: 'URL Tên miền Production',
+          help: 'Dùng để xem trước hình ảnh có đường dẫn tương đối gốc (ví dụ: /images/my-image.jpg).',
+          warning: 'Quan trọng: URL này rất quan trọng để xem trước hình ảnh trong các tab "Quản lý Bài viết" và "Quản lý Hình ảnh". URL không chính xác sẽ dẫn đến ảnh bị lỗi.'
+        },
         directories: {
           title: 'Cài đặt Thư mục',
           postsLabel: 'Thư mục Bài viết',
           imagesLabel: 'Thư mục Hình ảnh',
           notSelected: 'Chưa chọn',
           changeButton: 'Thay đổi',
+        },
+        compression: {
+            title: 'Nén & Chỉnh kích thước Ảnh',
+            enableLabel: 'Bật Nén & Chỉnh sửa',
+            enableHelp: 'Tự động xử lý ảnh vượt quá kích thước hoặc chiều rộng tối đa trước khi tải lên.',
+            maxSizeLabel: 'Kích thước ảnh tối đa (MB)',
+            maxSizeHelp: 'Ảnh lớn hơn kích thước này sẽ bị nén sang định dạng JPEG.',
+            resizeLabel: 'Chỉnh lại kích thước ảnh lớn',
+            resizeHelp: 'Thay đổi kích thước ảnh có chiều rộng vượt quá giá trị này. Tỷ lệ khung hình được giữ nguyên.',
+            originalSize: 'Giữ kích thước gốc',
         },
         creation: {
             title: 'Cài đặt Tạo Bài viết',
@@ -427,6 +545,15 @@ export const translations = {
           imageLabel: 'Loại file Hình ảnh',
           imageHelp: 'Ví dụ: `image/*` cho tất cả các loại ảnh.',
         },
+        dangerZone: {
+          title: 'Khu vực Nguy hiểm',
+          description: 'Hành động này sẽ xóa vĩnh viễn tất cả cài đặt đã lưu của bạn cho ứng dụng này khỏi bộ nhớ cục bộ của trình duyệt và tải lại trang. Điều này hữu ích nếu bạn muốn bắt đầu lại từ đầu.',
+          descriptionLogout: "Hành động này sẽ xóa vĩnh viễn tất cả cài đặt của bạn, đăng xuất khỏi ứng dụng và đưa bạn trở về màn hình kết nối. Điều này hữu ích nếu bạn muốn bắt đầu lại từ đầu.",
+          resetButton: 'Reset Tất cả Cài đặt',
+          resetButtonLogout: 'Reset & Đăng xuất',
+          confirm: 'Bạn có chắc chắn muốn reset tất cả cài đặt không? Hành động này không thể hoàn tác.',
+          confirmLogout: 'Bạn có chắc chắn muốn reset tất cả cài đặt và đăng xuất không? Hành động này không thể hoàn tác.',
+        }
       },
       footer: {
         sponsoredBy: 'Được tài trợ bởi',
@@ -444,6 +571,7 @@ export const translations = {
         loading: 'Đang tải bài viết...',
         error: {
             dirNotFound: 'Không tìm thấy thư mục: \'{{path}}\'. Vui lòng đảm bảo thư mục này tồn tại trong kho chứa của bạn. Bạn có thể thay đổi thư mục đích trong tab Cài đặt.',
+            setImageDomain: "Không tải được ảnh. Vui lòng đặt tên miền chính của website trong Cài đặt để xem trước ảnh.",
         },
         noPosts: 'Không tìm thấy bài viết nào trong thư mục đã chọn.',
         searchPlaceholder: 'Tìm kiếm theo tiêu đề, tác giả, danh mục, thẻ...',
@@ -460,6 +588,35 @@ export const translations = {
             next: 'Sau',
         },
         deleteConfirm: 'Bạn có chắc chắn muốn xóa "{{name}}"? Hành động này không thể hoàn tác.',
+    },
+    imageList: {
+        loading: 'Đang tải hình ảnh...',
+        error: {
+            dirNotFound: 'Không tìm thấy thư mục ảnh: \'{{path}}\'. Vui lòng kiểm tra đường dẫn trong Cài đặt.',
+            domainNotSetTitle: 'Chưa Đặt Tên miền Website',
+            domainNotSetDescription: 'Để xem trước hình ảnh, vui lòng vào tab Cài đặt và nhập URL tên miền production của website bạn.',
+        },
+        noImages: 'Không có ảnh nào trong thư mục đã chọn.',
+        searchPlaceholder: 'Tìm theo tên file...',
+        noResults: 'Không tìm thấy ảnh nào.',
+        deleteConfirm: 'Bạn có chắc muốn xóa "{{name}}"? Hành động này có thể làm hỏng các bài viết đang sử dụng ảnh này.',
+        fileSize: 'Kích thước',
+        delete: 'Xóa',
+        copyUrlButton: 'Sao chép URL',
+        urlCopied: 'Đã sao chép!',
+        infoBanner: {
+          title: 'Đang xem dưới dạng Thư viện File',
+          description: 'Ảnh xem trước được tải trực tiếp từ kho chứa của bạn, và giờ đã hỗ trợ cả kho chứa riêng tư. Để xem trước ảnh như trên một trang web thực tế, hãy đổi "Loại Dự án" thành Dự án Web trong Cài đặt và cung cấp URL tên miền.',
+        },
+        infoBannerWeb: {
+            title: 'Đang xem dưới dạng Dự án Web',
+            description: 'URL được định dạng cho website của bạn. Nhấp "Sao chép URL" để lấy liên kết sẵn sàng sử dụng để dán vào bài viết.',
+        },
+        pagination: {
+            prev: 'Trước',
+            pageInfo: 'Trang {{current}} trên {{total}}',
+            next: 'Sau',
+        },
     },
     postPreview: {
         tabMetadata: 'Siêu dữ liệu',

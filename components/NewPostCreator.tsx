@@ -1,7 +1,10 @@
+
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { GithubRepo } from '../types';
 import * as githubService from '../services/githubService';
 import { slugify, parseMarkdown, updateFrontmatter } from '../utils/parsing';
+import { compressImage } from '../utils/image';
 import { UploadIcon } from './icons/UploadIcon';
 import { SpinnerIcon } from './icons/SpinnerIcon';
 import { PhotoIcon } from './icons/PhotoIcon';
@@ -19,6 +22,9 @@ interface NewPostCreatorProps {
   newImageCommitTemplate: string;
   imageFileTypes: string;
   publishDateSource: 'file' | 'system';
+  imageCompressionEnabled: boolean;
+  maxImageSize: number;
+  imageResizeMaxWidth: number;
 }
 
 const TimelineItem: React.FC<{
@@ -56,7 +62,7 @@ const TimelineItem: React.FC<{
 };
 
 const NewPostCreator: React.FC<NewPostCreatorProps> = ({
-  token, repo, postsPath, imagesPath, newPostCommitTemplate, newImageCommitTemplate, imageFileTypes, publishDateSource
+  token, repo, postsPath, imagesPath, newPostCommitTemplate, newImageCommitTemplate, imageFileTypes, publishDateSource, imageCompressionEnabled, maxImageSize, imageResizeMaxWidth
 }) => {
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -91,11 +97,25 @@ const NewPostCreator: React.FC<NewPostCreatorProps> = ({
     };
   }, [imagePreviews]);
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const files = Array.from(event.target.files);
-      setImageFiles(prev => [...prev, ...files]);
-      const newPreviews = files.map(file => URL.createObjectURL(file as Blob));
+      
+      // FIX: Refactored to use an async map callback, which is a more robust pattern
+      // for handling multiple asynchronous operations and can resolve subtle type errors.
+      const processedFiles: File[] = await Promise.all(
+        // FIX: Add explicit types for the 'file' parameter and the return Promise type
+        // to resolve a TypeScript inference issue where 'file' was being typed as 'unknown'.
+        files.map(async (file: File): Promise<File> => {
+          if (imageCompressionEnabled) {
+            return compressImage(file, maxImageSize, imageResizeMaxWidth);
+          }
+          return file;
+        })
+      );
+
+      setImageFiles(prev => [...prev, ...processedFiles]);
+      const newPreviews = processedFiles.map(file => URL.createObjectURL(file));
       setImagePreviews(prev => [...prev, ...newPreviews]);
     }
   };
