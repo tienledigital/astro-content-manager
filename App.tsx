@@ -220,7 +220,7 @@ const App: React.FC = () => {
             <footer className="text-center mt-8 text-gray-500 text-sm">
                 <a href="https://github.com/tienledigital/astro-content-manager" target="_blank" rel="noopener noreferrer" className="inline-flex items-center hover:text-blue-600 transition-colors">
                     <GithubIcon className="w-4 h-4 mr-1.5" />
-                    Astro Content Manager v1.3.2
+                    Astro Content Manager v1.3.3
                 </a>
             </footer>
         </div>

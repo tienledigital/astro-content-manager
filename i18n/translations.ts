@@ -318,7 +318,7 @@ export const translations = {
         title: "Astro Content Manager Guide",
         welcome: {
           title: "Welcome!",
-          p1: "Hello, I'm your frontend engineer. I'm happy to give you an overview of the Astro Content Manager application's structure and functionality. This is a very interesting and well-designed app!"
+          p1: "Hello, I'm your Astro developer. I'm happy to give you an overview of the Astro Content Manager application's structure and functionality. This is a very interesting and well-designed app!"
         },
         overview: {
           title: "Application Overview",
@@ -405,6 +405,20 @@ export const translations = {
           componentsTemplate: "Generates a frontmatter template for validation.",
           componentsBackup: "Provides backup functionality.",
           componentsPicker: "The directory selection modal."
+        },
+        i18n: {
+            title: 'Internationalization (i18n) System',
+            p1: 'The application fully supports English and Vietnamese. The logic is managed in the',
+            p1_code1: 'i18n/',
+            p1_cont: 'directory. When you need to add new text, add a key and its corresponding value for both languages in the',
+            p1_code2: 'translations.ts',
+            p1_cont2: 'file, then call the',
+            p1_code3: "t('your.key')",
+            p1_cont3: 'function from the',
+            p1_code4: 'useI18n()',
+            p1_cont4: 'hook in your component. The selected language is saved in',
+            p1_code5: 'localStorage',
+            p1_cont5: 'to persist across sessions.'
         },
         updating: {
             title: "Updating the Application",
@@ -734,7 +748,7 @@ export const translations = {
       title: "Hướng dẫn sử dụng Astro Content Manager",
       welcome: {
         title: "Chào mừng bạn!",
-        p1: "Chào bạn, tôi là kỹ sư frontend của bạn đây. Rất vui được giải thích tổng quan về cấu trúc và cách hoạt động của ứng dụng Astro Content Manager. Đây là một ứng dụng rất thú vị và được thiết kế tốt!"
+        p1: "Chào bạn, tôi là nhà phát triển Astro của bạn đây. Rất vui được giải thích tổng quan về cấu trúc và cách hoạt động của ứng dụng Astro Content Manager. Đây là một ứng dụng rất thú vị và được thiết kế tốt!"
       },
       overview: {
         title: "Tổng Quan Ứng Dụng",
@@ -821,6 +835,20 @@ export const translations = {
         componentsTemplate: "Tạo mẫu frontmatter để xác thực.",
         componentsBackup: "Cung cấp chức năng sao lưu.",
         componentsPicker: "Cửa sổ chọn thư mục."
+      },
+      i18n: {
+        title: 'Hệ thống Đa ngôn ngữ (i18n)',
+        p1: 'Ứng dụng hỗ trợ đầy đủ tiếng Anh và tiếng Việt. Logic được quản lý trong thư mục',
+        p1_code1: 'i18n/',
+        p1_cont: '. Khi bạn cần thêm văn bản mới, hãy thêm một khóa và giá trị tương ứng cho cả hai ngôn ngữ trong file',
+        p1_code2: 'translations.ts',
+        p1_cont2: ', sau đó gọi hàm',
+        p1_code3: "t('your.key')",
+        p1_cont3: 'từ hook',
+        p1_code4: 'useI18n()',
+        p1_cont4: 'trong component của bạn. Ngôn ngữ được chọn sẽ được lưu vào',
+        p1_code5: 'localStorage',
+        p1_cont5: 'để duy trì qua các phiên làm việc.'
       },
       updating: {
         title: "Cập nhật Ứng dụng",
