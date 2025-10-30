@@ -18,7 +18,7 @@ export const translations = {
     },
     githubConnect: {
       title: 'Astro Content Manager',
-      subtitle: 'Connect to your GitHub repository to start managing content.',
+      subtitle: 'Connect to your GitHub repository to start managing content for your Astro project.',
       repoUrlLabel: 'Repository URL',
       repoUrlPlaceholder: 'https://github.com/owner/repo-name',
       tokenLabel: 'Personal Access Token',
@@ -448,7 +448,7 @@ export const translations = {
     },
     githubConnect: {
       title: 'Astro Content Manager',
-      subtitle: 'Kết nối với kho chứa GitHub của bạn để bắt đầu quản lý nội dung.',
+      subtitle: 'Kết nối với kho chứa GitHub của bạn để bắt đầu quản lý nội dung cho dự án Astro.',
       repoUrlLabel: 'URL Kho chứa',
       repoUrlPlaceholder: 'https://github.com/owner/repo-name',
       tokenLabel: 'Personal Access Token',

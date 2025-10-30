@@ -218,10 +218,13 @@ const App: React.FC = () => {
         <div className="flex flex-col items-center justify-center min-h-screen p-4">
             <GithubConnect onSubmit={handleLogin} error={error} />
             <footer className="text-center mt-8 text-gray-500 text-sm">
-                <a href="https://github.com/tienledigital/astro-content-manager" target="_blank" rel="noopener noreferrer" className="inline-flex items-center hover:text-blue-600 transition-colors">
-                    <GithubIcon className="w-4 h-4 mr-1.5" />
-                    Astro Content Manager v1.3.3
-                </a>
+                <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                    <a href="https://github.com/tienledigital/astro-content-manager" target="_blank" rel="noopener noreferrer" className="inline-flex items-center hover:text-blue-600 transition-colors">
+                        <GithubIcon className="w-4 h-4 mr-1.5" />
+                        Astro Content Manager v1.3.3
+                    </a>
+                    <LanguageSwitcher />
+                </div>
             </footer>
         </div>
       ) : (
