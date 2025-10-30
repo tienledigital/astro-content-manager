@@ -7,6 +7,8 @@ A simple, clean web interface to upload Markdown/MDX posts and images directly t
 
 ![Astro Content Manager Preview](.github/assets/app-preview.png)
 
+**Quick Links:** [Project Overview](./OVERVIEW.md) • [User Guide](./GUIDE.md) • [Changelog](./CHANGELOG.md) • [Licenses](./LICENSES.md)
+
 ---
 
 ## ✨ Key Features
@@ -45,4 +47,4 @@ Contributions are welcome! Please feel free to submit a pull request or open an 
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. See the [LICENSES.md](./LICENSES.md) file for more details on third-party software.
