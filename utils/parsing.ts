@@ -163,3 +163,12 @@ export const inferFrontmatterType = (value: any): string => {
     if (typeof value === 'string' && !isNaN(new Date(value).getTime())) return 'date';
     return 'string';
 };
+
+/**
+ * Escapes characters in a string that have special meaning in a regular expression.
+ * @param str The input string.
+ * @returns The escaped string, safe to use in a RegExp.
+ */
+export const escapeRegExp = (str: string): string => {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+};

@@ -1,9 +1,10 @@
 
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { GithubRepo } from '../types';
 import * as githubService from '../services/githubService';
-import { slugify, parseMarkdown, updateFrontmatter } from '../utils/parsing';
+import { slugify, parseMarkdown, updateFrontmatter, escapeRegExp } from '../utils/parsing';
 import { compressImage } from '../utils/image';
 import { UploadIcon } from './icons/UploadIcon';
 import { SpinnerIcon } from './icons/SpinnerIcon';
@@ -66,6 +67,7 @@ const NewPostCreator: React.FC<NewPostCreatorProps> = ({
 }) => {
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [imageNameChanges, setImageNameChanges] = useState<Record<string, string>>({});
   
   const [markdownFile, setMarkdownFile] = useState<File | null>(null);
   const [markdownContent, setMarkdownContent] = useState<string | null>(null);
@@ -100,21 +102,24 @@ const NewPostCreator: React.FC<NewPostCreatorProps> = ({
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const files = Array.from(event.target.files);
-      
-      // FIX: Refactored to use an async map callback, which is a more robust pattern
-      // for handling multiple asynchronous operations and can resolve subtle type errors.
+      const newNameChanges: Record<string, string> = {};
+
       const processedFiles: File[] = await Promise.all(
-        // FIX: Add explicit types for the 'file' parameter and the return Promise type
-        // to resolve a TypeScript inference issue where 'file' was being typed as 'unknown'.
-        files.map(async (file: File): Promise<File> => {
-          if (imageCompressionEnabled) {
-            return compressImage(file, maxImageSize, imageResizeMaxWidth);
+        files.map(async (originalFile: File): Promise<File> => {
+          const processedFile = imageCompressionEnabled
+            ? await compressImage(originalFile, maxImageSize, imageResizeMaxWidth)
+            : originalFile;
+          
+          if (originalFile.name !== processedFile.name) {
+            newNameChanges[originalFile.name] = processedFile.name;
           }
-          return file;
+          return processedFile;
         })
       );
 
       setImageFiles(prev => [...prev, ...processedFiles]);
+      setImageNameChanges(prev => ({...prev, ...newNameChanges}));
+
       const newPreviews = processedFiles.map(file => URL.createObjectURL(file));
       setImagePreviews(prev => [...prev, ...newPreviews]);
     }
@@ -123,6 +128,7 @@ const NewPostCreator: React.FC<NewPostCreatorProps> = ({
   const resetState = () => {
       setImageFiles([]);
       setImagePreviews([]);
+      setImageNameChanges({});
       setMarkdownFile(null);
       setMarkdownContent(null);
       setValidatedFrontmatter(null);
@@ -269,20 +275,28 @@ const NewPostCreator: React.FC<NewPostCreatorProps> = ({
     setSuccess(null);
 
     try {
+        // First, upload all the (processed) image files
         await Promise.all(imageFiles.map(file => {
             const commitMessage = newImageCommitTemplate.replace('{filename}', file.name);
             const fullPath = imagesPath ? `${imagesPath}/${file.name}` : file.name;
             return githubService.uploadFile(token, repo.owner.login, repo.name, fullPath, file, commitMessage);
         }));
 
-        const { frontmatter } = parseMarkdown(markdownContent);
+        // Now, prepare the markdown file, updating any changed image names
+        let finalMarkdownContent = markdownContent;
+        for (const [originalName, newName] of Object.entries(imageNameChanges)) {
+            const regex = new RegExp(escapeRegExp(originalName), 'g');
+            finalMarkdownContent = finalMarkdownContent.replace(regex, newName);
+        }
+
+        const { frontmatter } = parseMarkdown(finalMarkdownContent);
         const slug = slugify(frontmatter.title);
         const fileExtension = markdownFile.name.split('.').pop() || 'md';
         const filename = `${slug}.${fileExtension}`;
         const postPath = postsPath ? `${postsPath}/${filename}` : filename;
         
         const commitMessage = newPostCommitTemplate.replace('{filename}', filename);
-        await githubService.createFileFromString(token, repo.owner.login, repo.name, postPath, markdownContent, commitMessage);
+        await githubService.createFileFromString(token, repo.owner.login, repo.name, postPath, finalMarkdownContent, commitMessage);
 
         setSuccess(t('newPost.publishSuccess', { filename }));
         setTimeout(resetState, 3000);
