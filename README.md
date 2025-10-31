@@ -31,6 +31,19 @@ To use the Astro Content Manager, you just need to open the `index.html` file in
 3.  **Setup:** Select your posts directory from the suggested paths or pick one manually.
 4.  **Manage:** Use the dashboard to manage your existing content or create new posts!
 
+## 🖼️ Screenshots
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/tienledigital/astro-content-manager/main/.github/assets/screenshot-1.png" width="32%" alt="Dashboard View">
+  <img src="https://raw.githubusercontent.com/tienledigital/astro-content-manager/main/.github/assets/screenshot-2.png" width="32%" alt="Post Management">
+  <img src="https://raw.githubusercontent.com/tienledigital/astro-content-manager/main/.github/assets/screenshot-3.png" width="32%" alt="New Post Creator">
+</p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/tienledigital/astro-content-manager/main/.github/assets/screenshot-4.png" width="32%" alt="Settings Page">
+  <img src="https://raw.githubusercontent.com/tienledigital/astro-content-manager/main/.github/assets/screenshot-5.png" width="32%" alt="Image Management">
+  <img src="https://raw.githubusercontent.com/tienledigital/astro-content-manager/main/.github/assets/screenshot-6.png" width="32%" alt="Template Management">
+</p>
+
 ## 🛠️ Technology Stack
 
 - **Frontend:** React, TypeScript
