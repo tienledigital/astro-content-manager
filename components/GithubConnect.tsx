@@ -100,8 +100,8 @@ const GithubConnect: React.FC<GithubConnectProps> = ({ onSubmit, error }) => {
       
       {error && <p className="mt-4 text-red-600 text-sm text-center">{error}</p>}
       
-      <div className="mt-6 text-center text-xs text-gray-500">
-        <p>{t('githubConnect.tokenDisclaimer')}</p>
+      <div className="mt-6 pt-6 border-t border-gray-200">
+        <p className="text-center text-xs text-gray-500">{t('githubConnect.tokenDisclaimer')}</p>
       </div>
     </div>
   );

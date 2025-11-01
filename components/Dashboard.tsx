@@ -10,7 +10,6 @@ import { ListIcon } from './icons/ListIcon';
 import { PlusCircleIcon } from './icons/PlusCircleIcon';
 import { SettingsIcon } from './icons/SettingsIcon';
 import { FolderIcon } from './icons/FolderIcon';
-import { PencilIcon } from './icons/PencilIcon';
 import { InfoIcon } from './icons/InfoIcon';
 import { ImageIcon } from './icons/ImageIcon';
 import { SpinnerIcon } from './icons/SpinnerIcon';
@@ -810,7 +809,7 @@ const Dashboard: React.FC<DashboardProps> = ({ token, repo, onResetAndLogout }) 
 
       <footer className="mt-12 pt-8 border-t border-gray-200">
         <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-gray-500">
-            <p>Astro Content Manager v1.3.2</p>
+            <p>Astro Content Manager v1.3.3</p>
             <div className="flex items-center space-x-4 mt-2 sm:mt-0">
                 <p>
                   {t('dashboard.footer.sponsoredBy')}{' '}

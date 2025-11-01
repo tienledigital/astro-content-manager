@@ -1,10 +1,11 @@
-
 # Astro Content Manager
-> Current Version: 1.3.2
+> Current Version: 1.3.3
 
 A simple, clean web interface to upload Markdown/MDX posts and images directly to your Astro project's GitHub repository. Streamline your content workflow without leaving the browser.
 
 ![Astro Content Manager Preview](.github/assets/app-preview.png)
+
+**Quick Links:** [Project Overview](./OVERVIEW.md) • [User Guide](./GUIDE.md) • [Changelog](./CHANGELOG.md) • [Licenses](./LICENSES.md)
 
 ---
 
@@ -57,4 +58,4 @@ Contributions are welcome! Please feel free to submit a pull request or open an 
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. See the [LICENSES.md](./LICENSES.md) file for more details on third-party software.

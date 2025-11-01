@@ -140,6 +140,11 @@ const GuideModal: React.FC<GuideModalProps> = ({ onClose }) => {
                         </li>
                     </UL>
                 
+                <SectionTitle>{t('guide.i18n.title')}</SectionTitle>
+                <P>
+                    {t('guide.i18n.p1')} <Code>{t('guide.i18n.p1_code1')}</Code> {t('guide.i18n.p1_cont')} <Code>{t('guide.i18n.p1_code2')}</Code> {t('guide.i18n.p1_cont2')} <Code>{t('guide.i18n.p1_code3')}</Code> {t('guide.i18n.p1_cont3')} <Code>{t('guide.i18n.p1_code4')}</Code> {t('guide.i18n.p1_cont4')} <Code>{t('guide.i18n.p1_code5')}</Code> {t('guide.i18n.p1_cont5')}
+                </P>
+
                 <SectionTitle>{t('guide.updating.title')}</SectionTitle>
                 <P>{t('guide.updating.p1')}</P>
                 <P>{t('guide.updating.p2')}</P>

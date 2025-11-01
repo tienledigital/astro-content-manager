@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { GithubRepo } from '../types';
 import * as githubService from '../services/githubService';
-import { parseMarkdown, updateFrontmatter, ParsedMarkdown } from '../utils/parsing';
+import { parseMarkdown, updateFrontmatter, ParsedMarkdown, escapeRegExp } from '../utils/parsing';
 import { compressImage } from '../utils/image';
 import { SpinnerIcon } from './icons/SpinnerIcon';
 import { ImageIcon } from './icons/ImageIcon';
@@ -219,9 +219,16 @@ const PostList: React.FC<PostListProps> = ({
       const imageCommitMessage = newImageCommitTemplate.replace('{filename}', fileToUpload.name);
       const fullImagePath = imagesPath ? `${imagesPath}/${fileToUpload.name}` : fileToUpload.name;
       await githubService.uploadFile(token, repo.owner.login, repo.name, fullImagePath, fileToUpload, imageCommitMessage);
+      
+      let contentToUpdate = changingImageForPost.rawContent;
 
-      // This path logic is for web projects (Astro/Next.js).
-      // For GitHub Library mode, the user should ideally use the full repo path in frontmatter.
+      // If compression changed the filename, replace all occurrences in the post content
+      if (imageFile.name !== fileToUpload.name) {
+        const regex = new RegExp(escapeRegExp(imageFile.name), 'g');
+        contentToUpdate = contentToUpdate.replace(regex, fileToUpload.name);
+      }
+
+      // Also explicitly update the main `image` frontmatter key to be safe
       let publicPath = imagesPath;
       if (publicPath.startsWith('public/')) {
           publicPath = publicPath.substring('public/'.length);
@@ -231,10 +238,10 @@ const PostList: React.FC<PostListProps> = ({
       const urlParts = [publicPath, fileToUpload.name].filter(Boolean);
       const newImageUrl = `/${urlParts.join('/')}`;
 
-      const newContent = updateFrontmatter(changingImageForPost.rawContent, { image: newImageUrl });
-
+      const finalContent = updateFrontmatter(contentToUpdate, { image: newImageUrl });
+      
       const postUpdateCommitMessage = updatePostCommitTemplate.replace('{filename}', changingImageForPost.name);
-      await githubService.updateFileContent(token, repo.owner.login, repo.name, changingImageForPost.path, newContent, postUpdateCommitMessage, changingImageForPost.sha);
+      await githubService.updateFileContent(token, repo.owner.login, repo.name, changingImageForPost.path, finalContent, postUpdateCommitMessage, changingImageForPost.sha);
 
       await fetchPosts();
     } catch (err) {
